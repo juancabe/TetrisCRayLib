@@ -257,6 +257,13 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
             }
         }
     }
+    if(IsKeyPressed(KEY_SPACE)){
+        while(!checkDownCollision(fallingPiece, logicTable)){
+            fallingPiece->y++;
+        }
+        logicTableAddPiece(fallingPiece, logicTable);
+        *pieceFalling = false;
+    }
 
 }
 
