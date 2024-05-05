@@ -252,8 +252,6 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
                 }
 
                 free(temp);
-                printf("Piece rotated\n");
-
             } else {
                 printf("Error rotating piece\n");
             }
@@ -272,6 +270,34 @@ void drawPiece(pieceEntity * fallingPiece, int x, int y, int size, int tableXPos
         }
     }
 }
+
+void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_HEI], float * currentLevel){
+    for(int i = 0; i < T_HEI; i++){
+        bool complete = true;
+        for(int j = 0; j < T_WID; j++){
+            if(!logicTable[j][i]){
+                complete = false;
+                break;
+            }
+        }
+        if(complete){
+            // Move all the lines above one line down, except the first line
+            for(int k = i; k > 0; k--){
+                for(int j = 0; j < T_WID; j++){
+                    logicTable[j][k] = logicTable[j][k-1];
+                    drawTable[j][k] = drawTable[j][k-1];
+                }
+            }
+            for(int j = 0; j < T_WID; j++){
+                logicTable[j][0] = false;
+                drawTable[j][0] = TETRIS_BACKGROUND_COLOR;
+            }
+            *currentLevel += 0.5;
+
+        }
+    }
+}
+
 
 
 int main(void)
@@ -334,6 +360,10 @@ int main(void)
 
         if(!pieceFalling){
             generateNewPiece(&fallingPiece);
+            if(checkDownCollision(&fallingPiece, logicTable)){
+                gameOver = true;
+                break;
+            }
             pieceFalling = true;
         }
 
@@ -348,6 +378,8 @@ int main(void)
                 }
             }
         }
+
+        checkCompleteLines(logicTable, drawTable, &currentLevel);
 
         BeginDrawing();
 
