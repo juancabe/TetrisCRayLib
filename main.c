@@ -7,56 +7,14 @@
 #include <stdbool.h>
 
 #define T_WID 10
-#define T_HEI 30
+#define T_HEI 25
 #define PIECE_COLORS_NUM 6
 
 #define TETRIS_BACKGROUND_COLOR BLACK
 
+#define FRAME_THICKNESS 10
+
 typedef bool piece[4][4];
-
-piece basicO = {
-    {0,0,0,0},
-    {0,1,1,0},
-    {0,1,1,0},
-    {0,0,0,0}
-};
-
-piece basicI = {
-    {0,1,0,0},
-    {0,1,0,0},
-    {0,1,0,0},
-    {0,1,0,0}
-};
-piece basicS = {
-    {0,0,0,0},
-    {0,1,1,0},
-    {1,1,0,0},
-    {0,0,0,0}
-};
-piece basicZ = {
-    {0,0,0,0},
-    {1,1,0,0},
-    {0,1,0,0},
-    {0,0,0,0}
-};
-piece basicL = {
-    {0,1,0,0},
-    {0,1,0,0},
-    {0,1,1,0},
-    {0,0,0,0}
-};
-piece basicJ = {
-    {0,1,0,0},
-    {0,1,0,0},
-    {1,1,0,0},
-    {0,0,0,0}
-};
-piece basicT = {
-    {0,0,0,0},
-    {1,1,1,0},
-    {0,1,0,0},
-    {0,0,0,0}
-};
 
 piece basicPieces[7] = {
     {
@@ -105,9 +63,6 @@ piece basicPieces[7] = {
 };
 
 Color piecesColors[PIECE_COLORS_NUM] = {MAGENTA, GREEN, RED, ORANGE, BLUE, YELLOW};
-
-
-
 
 typedef struct{
     piece p;
@@ -213,33 +168,26 @@ bool checkIfPieceCanRotate(pieceEntity * fallingPiece, bool logicTable[T_WID][T_
 
 
 void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], clock_t * currentMillis, clock_t * lastMillis, float currentLevel, bool * pieceFalling){
-    if(*currentMillis - *lastMillis > 100.0/currentLevel){ // Automatic fall
-        *lastMillis = *currentMillis;
-        if(!checkDownCollision(fallingPiece, logicTable)){
-            fallingPiece->y++;
-        } else {
-            logicTableAddPiece(fallingPiece, logicTable);
-            *pieceFalling = false;
-        }
-        return;
-    }
-
+    
     // User input movement
 
     if(IsKeyPressed(KEY_LEFT)){
         if(!checkLeftCollision(fallingPiece, logicTable)){
             fallingPiece->x--;
         }
+        return;
     }
     if(IsKeyPressed(KEY_RIGHT)){
         if(!checkRightCollision(fallingPiece, logicTable)){
             fallingPiece->x++;
         }
+        return;
     }
     if(IsKeyPressed(KEY_DOWN)){
         if(!checkDownCollision(fallingPiece, logicTable)){
             fallingPiece->y++;
         }
+        return;
     }
     if(IsKeyPressed(KEY_UP)){
         piece * temp = NULL;
@@ -255,6 +203,7 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
                 printf("Error rotating piece\n");
             }
         }
+        return;
     }
     if(IsKeyPressed(KEY_SPACE)){
         while(!checkDownCollision(fallingPiece, logicTable)){
@@ -262,7 +211,20 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
         }
         logicTableAddPiece(fallingPiece, logicTable);
         *pieceFalling = false;
+        return;
     }
+    
+    if(*currentMillis - *lastMillis > 100.0/currentLevel){ // Automatic fall
+        *lastMillis = *currentMillis;
+        if(!checkDownCollision(fallingPiece, logicTable)){
+            fallingPiece->y++;
+        } else {
+            logicTableAddPiece(fallingPiece, logicTable);
+            *pieceFalling = false;
+        }
+        return;
+    }
+
 
 }
 
@@ -272,6 +234,17 @@ void drawPiece(pieceEntity * fallingPiece, int x, int y, int size, int tableXPos
             if(fallingPiece->p[i][j]){
                 DrawRectangle(tableXPosition + (fallingPiece->x + i)*size, tableYPosition + (fallingPiece->y + j)*size, size, size, fallingPiece->c);
                 DrawRectangleLines(tableXPosition + (fallingPiece->x + i)*size, tableYPosition + (fallingPiece->y + j)*size, size, size, (Color){255,255,255,90});
+            }
+        }
+    }
+}
+
+void drawPiceAtPos(pieceEntity * piece, int x, int y, int size){
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            if(piece->p[i][j]){
+                DrawRectangle(x + i*size, y + j*size, size, size, piece->c);
+                DrawRectangleLines(x + i*size, y + j*size, size, size, (Color){255,255,255,90});
             }
         }
     }
@@ -298,7 +271,7 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
                 logicTable[j][0] = false;
                 drawTable[j][0] = TETRIS_BACKGROUND_COLOR;
             }
-            *currentLevel += 0.5;
+            *currentLevel += 0.20;
 
         }
     }
@@ -306,26 +279,36 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
 
 
 
+
 int main(void)
 {   
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+
+    const int screenWidth = 1200;
+    const int screenHeight = 700;
+    const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
+    const Color gameOverColor = ColorBrightness(RED, -0.7);
 
     int TETRIS_BLOCK_SIZE;
     int BLOCK_BORDER_SIZE;
 
     bool gameOver = false;
     bool pieceFalling = false;
+    bool pieceSaved = false;
 
     pieceEntity fallingPiece;
+    pieceEntity savedPiece;
+    pieceEntity nextPiece;
 
     float currentLevel = 1.0;
     int currentGameTime = 0;
+    int piecesPlaced = 0;
+    int lastPiecesPlaced = -1;
     clock_t lastMillis = 0;
+
 
     // Reduce brightness of colors
     for(int i = 0; i < PIECE_COLORS_NUM; i++){
-        piecesColors[i] = ColorBrightness(piecesColors[i], 0.2);
+        piecesColors[i] = ColorBrightness(piecesColors[i], -0.2);
     }
 
     srand(time(NULL));
@@ -354,6 +337,9 @@ int main(void)
         }
     }
 
+    generateNewPiece(&savedPiece);
+    generateNewPiece(&nextPiece);
+
     InitWindow(screenWidth, screenHeight, "Tetris");
 
     SetTargetFPS(144);
@@ -362,15 +348,62 @@ int main(void)
 
     while (!WindowShouldClose()){
 
+
+        if(gameOver){
+            BeginDrawing();
+            ClearBackground(gameOverColor);
+            DrawText("Game Over", screenWidth*1/7, screenHeight/2-(240*((float)screenWidth/1600.0))/2, 240*((float)screenWidth/1600.0), WHITE);
+            DrawText("Press ENTER...", screenWidth*1/3, screenHeight/2+(240*((float)screenWidth/1600.0) + 40), 70*((float)screenWidth/1600.0), WHITE);
+            if(IsKeyPressed(KEY_ENTER)){
+                gameOver = false;
+            }
+            EndDrawing();
+            continue;
+        }
+
         clock_t current_millis = clock()/(CLOCKS_PER_SEC/1000);
+        
 
         if(!pieceFalling){
-            generateNewPiece(&fallingPiece);
+            fallingPiece = nextPiece;
+            generateNewPiece(&nextPiece);
             if(checkDownCollision(&fallingPiece, logicTable)){
                 gameOver = true;
-                break;
+                pieceFalling = false;
+                pieceSaved = false;
+                piecesPlaced = 0;
+                lastPiecesPlaced = -1;
+                currentLevel = 1.0;
+                for(int i = 0; i < T_WID; i++){
+                    for(int j = 0; j < T_HEI; j++){
+                        logicTable[i][j] = false;
+                        drawTable[i][j] = TETRIS_BACKGROUND_COLOR;
+                    }
+                }
+                generateNewPiece(&nextPiece);
+                generateNewPiece(&savedPiece);
+
+                continue;
             }
             pieceFalling = true;
+        }
+
+        if(IsKeyPressed(KEY_C)){
+            if(piecesPlaced != lastPiecesPlaced){
+                pieceEntity temp = fallingPiece;
+                if(!pieceSaved){
+                    fallingPiece = nextPiece;
+                    generateNewPiece(&nextPiece);
+                }
+                else
+                    fallingPiece = savedPiece;
+                    temp.x = T_WID/2 - 1;
+                    temp.y = 0;
+                    savedPiece = temp;
+                    pieceSaved = true;
+                    lastPiecesPlaced = piecesPlaced;
+            }
+            
         }
 
         pieceShouldDo(&fallingPiece, logicTable, &current_millis, &lastMillis, currentLevel, &pieceFalling);
@@ -380,6 +413,7 @@ int main(void)
                 for(int j = 0; j < 4; j++){
                     if(fallingPiece.p[i][j]){
                         drawTable[fallingPiece.x + i][fallingPiece.y + j] = fallingPiece.c;
+                        piecesPlaced++;
                     }
                 }
             }
@@ -389,7 +423,7 @@ int main(void)
 
         BeginDrawing();
 
-        ClearBackground(GRAY);
+        ClearBackground(loopBackgroundColor);
 
         // Draw drawTable
         for(int i = 0; i < T_WID; i++){
@@ -423,10 +457,6 @@ int main(void)
             }
         }
 
-
-        printf("True values: %d %d %d %d\n", trueValues[0][0], trueValues[1][0], trueValues[2][0], trueValues[3][0]);
-        printf("True values: %d %d %d %d\n", trueValues[0][1], trueValues[1][1], trueValues[2][1], trueValues[3][1]);
-
         for(int i = 0; i < 4; i++){
             if(trueValues[i][0] != -1){
                 for(int y = trueValues[i][1]; y < T_HEI; y++){
@@ -441,8 +471,36 @@ int main(void)
 
 
         // Draw level as "Score: level"
-        DrawText(TextFormat("Score: %d", (int)((currentLevel-1)*153)), 10, screenHeight/2, 90, WHITE);
+        DrawText(TextFormat("Score: %d", ((int)(currentLevel-1)*100) + piecesPlaced*5), 10, screenHeight/2, 90*((float)screenWidth/1600.0), WHITE);
         
+        if(pieceSaved){
+            DrawText("Piece saved", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 + screenHeight/15, 90*((float)screenWidth/1600.0), WHITE);
+            Rectangle savedPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS + TETRIS_BLOCK_SIZE,
+                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3};
+            DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS + TETRIS_BLOCK_SIZE,
+                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
+            DrawRectangleLinesEx(savedPieceFrame, FRAME_THICKNESS, WHITE);
+            drawPiceAtPos(&savedPiece, screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID, screenHeight/2 + screenHeight/6 + TETRIS_BLOCK_SIZE*3, TETRIS_BLOCK_SIZE);    
+        }
+
+        // Draw next piece
+        DrawText("Next piece", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 - screenHeight*2/5, 90*((float)screenWidth/1600.0), WHITE);
+        Rectangle nextPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS - TETRIS_BLOCK_SIZE*2,
+                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3};
+
+        DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS - TETRIS_BLOCK_SIZE*2,
+                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
+        DrawRectangleLinesEx(nextPieceFrame, FRAME_THICKNESS, WHITE);
+        drawPiceAtPos(&nextPiece, screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID, screenHeight/2 - screenHeight/5, TETRIS_BLOCK_SIZE);
+        
+
+
+
+
+        // Draw frame around the table
+        Rectangle tableFrame = {tableXPosition - FRAME_THICKNESS, tableYPosition - FRAME_THICKNESS,
+                                T_WID*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*2, T_HEI*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*2};
+        DrawRectangleLinesEx(tableFrame, FRAME_THICKNESS, WHITE);
 
 
         EndDrawing();
