@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #define T_WID 10
-#define T_HEI 20
+#define T_HEI 30
 #define PIECE_COLORS_NUM 6
 
 #define TETRIS_BACKGROUND_COLOR BLACK
@@ -250,7 +250,6 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
                         fallingPiece->p[i][j] = (*temp)[i][j];
                     }
                 }
-
                 free(temp);
             } else {
                 printf("Error rotating piece\n");
@@ -326,7 +325,7 @@ int main(void)
 
     // Reduce brightness of colors
     for(int i = 0; i < PIECE_COLORS_NUM; i++){
-        piecesColors[i] = ColorBrightness(piecesColors[i], 0.5);
+        piecesColors[i] = ColorBrightness(piecesColors[i], 0.2);
     }
 
     srand(time(NULL));
@@ -410,12 +409,42 @@ int main(void)
             drawPiece(&fallingPiece,
                     TETRIS_BLOCK_SIZE, TETRIS_BLOCK_SIZE, TETRIS_BLOCK_SIZE,
                     tableXPosition, tableYPosition);
+
+        // Endarken all the canvas pieces under the falling piece true values
+        int trueValues[4][2];
+        memset(trueValues, -1, sizeof(trueValues));
         
-        // Draw piece coordinates
-        DrawText(TextFormat("X: %d Y: %d", fallingPiece.x, fallingPiece.y), 10, 10, 20, WHITE);
-        // Draw if piece is falling
-        DrawText(TextFormat("Piece falling: %s", pieceFalling ? "true" : "false"), 10, 30, 20, WHITE);
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                if(fallingPiece.p[i][j]){
+                    trueValues[i][0] = fallingPiece.x + i;
+                    trueValues[i][1] = fallingPiece.y + j;
+                }
+            }
+        }
+
+
+        printf("True values: %d %d %d %d\n", trueValues[0][0], trueValues[1][0], trueValues[2][0], trueValues[3][0]);
+        printf("True values: %d %d %d %d\n", trueValues[0][1], trueValues[1][1], trueValues[2][1], trueValues[3][1]);
+
+        for(int i = 0; i < 4; i++){
+            if(trueValues[i][0] != -1){
+                for(int y = trueValues[i][1]; y < T_HEI; y++){
+                    if(logicTable[trueValues[i][0]][y]){
+                        DrawRectangle(tableXPosition + trueValues[i][0]*TETRIS_BLOCK_SIZE,
+                                    tableYPosition + y*TETRIS_BLOCK_SIZE, TETRIS_BLOCK_SIZE,
+                                    TETRIS_BLOCK_SIZE, ColorBrightness(drawTable[trueValues[i][0]][y], -0.5));
+                    }
+                }
+            }
+        }
+
+
+        // Draw level as "Score: level"
+        DrawText(TextFormat("Score: %d", (int)((currentLevel-1)*153)), 10, screenHeight/2, 90, WHITE);
         
+
+
         EndDrawing();
     }
 
