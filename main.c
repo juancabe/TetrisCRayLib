@@ -13,7 +13,7 @@
 #define TETRIS_BACKGROUND_COLOR BLACK
 
 #define FRAME_THICKNESS 10
-#define P_SIZE 4
+#define P_SIZE 5
 
 typedef bool piece[P_SIZE][P_SIZE];
 
@@ -29,46 +29,53 @@ typedef enum{
 
 piece basicPieces[7] = {
     {
-        {0,0,0,0},
-        {0,1,1,0},
-        {0,1,1,0},
-        {0,0,0,0}
+        {0,0,0,0,0},
+        {0,0,0,0,0},
+        {0,1,1,0,0},
+        {0,1,1,0,0},
+        {0,0,0,0,0}
     },
     {
-        {0,1,0,0},
-        {0,1,0,0},
-        {0,1,0,0},
-        {0,1,0,0}
+        {0,0,0,0,0},
+        {0,1,0,0,0},
+        {0,1,0,0,0},
+        {0,1,0,0,0},
+        {0,1,0,0,0}
     },
     {
-        {0,0,0,0},
-        {0,1,1,0},
-        {1,1,0,0},
-        {0,0,0,0}
+        {0,0,0,0,0},
+        {0,0,1,1,0},
+        {0,1,1,0,0},
+        {0,0,0,0,0},
+        {0,0,0,0,0}
     },
     {
-        {0,0,0,0},
-        {1,1,0,0},
-        {0,1,1,0},
-        {0,0,0,0}
+        {0,0,0,0,0},
+        {0,1,1,0,0},
+        {0,0,1,1,0},
+        {0,0,0,0,0},
+        {0,0,0,0,0}
+    },
+    {   
+        {0,0,0,0,0},
+        {0,0,1,0,0},
+        {0,0,1,0,0},
+        {0,0,1,1,0},
+        {0,0,0,0,0}
+    },
+    {   
+        {0,0,0,0,0},
+        {0,0,1,0,0},
+        {0,0,1,0,0},
+        {0,1,1,0,0},
+        {0,0,0,0,0}
     },
     {
-        {0,1,0,0},
-        {0,1,0,0},
-        {0,1,1,0},
-        {0,0,0,0}
-    },
-    {
-        {0,1,0,0},
-        {0,1,0,0},
-        {1,1,0,0},
-        {0,0,0,0}
-    },
-    {
-        {0,0,0,0},
-        {1,1,1,0},
-        {0,1,0,0},
-        {0,0,0,0}
+        {0,0,0,0,0},
+        {0,0,0,0,0},
+        {0,1,1,1,0},
+        {0,0,1,0,0},
+        {0,0,0,0,0}
     
     }
 };
@@ -85,8 +92,8 @@ typedef struct{
 
 void generateNewPiece(pieceEntity * fallingPiece){
     int res = rand() % 7;
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             fallingPiece->p[i][j] = basicPieces[res][i][j];
         }
     }
@@ -98,8 +105,8 @@ void generateNewPiece(pieceEntity * fallingPiece){
 }
 
 bool checkLeftCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI]){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(fallingPiece->p[i][j]){
                 if(fallingPiece->x + i - 1 < 0 || logicTable[fallingPiece->x + i - 1][fallingPiece->y + j]){
                     return true;
@@ -111,8 +118,8 @@ bool checkLeftCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI
 }
 
 bool checkRightCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI]){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(fallingPiece->p[i][j]){
                 if(fallingPiece->x + i + 1 >= T_WID || logicTable[fallingPiece->x + i + 1][fallingPiece->y + j]){
                     return true;
@@ -124,8 +131,8 @@ bool checkRightCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HE
 }
 
 bool checkDownCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI]){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(fallingPiece->p[i][j]){
                 if(fallingPiece->y + j + 1 >= T_HEI || logicTable[fallingPiece->x + i][fallingPiece->y + j + 1]){
                     return true;
@@ -137,11 +144,37 @@ bool checkDownCollision(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI
 }
 
 void logicTableAddPiece(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI]){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(fallingPiece->p[i][j]){
                 logicTable[fallingPiece->x + i][fallingPiece->y + j] = true;
             }
+        }
+    }
+}
+
+void rotate90AntiClockwise(piece * a)
+{
+    // Consider all squares one by one
+    for (int x = 0; x < P_SIZE / 2; x++) {
+        // Consider elements in group
+        // of 4 in current square
+        for (int y = x; y < P_SIZE - x - 1; y++) {
+            // Store current cell in
+            // temp variable
+            bool temp = (* a)[x][y];
+ 
+            // Move values from right to top
+            (* a)[x][y] = (* a)[y][P_SIZE - 1 - x];
+ 
+            // Move values from bottom to right
+            (* a)[y][P_SIZE - 1 - x] = (* a)[P_SIZE - 1 - x][P_SIZE - 1 - y];
+ 
+            // Move values from left to bottom
+            (* a)[P_SIZE - 1 - x][P_SIZE - 1 - y] = (* a)[P_SIZE - 1 - y][x];
+ 
+            // Assign temp to left
+            (* a)[P_SIZE - 1 - y][x] = temp;
         }
     }
 }
@@ -160,9 +193,19 @@ void rotate90Clockwise(piece * a)
 }
 
 bool checkIfPieceCanRotate(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], piece ** refToRot){
+
     piece * temp = malloc(sizeof(piece));
     memcpy(*temp, fallingPiece->p, sizeof(piece));
-    rotate90Clockwise(temp);
+    
+    if(fallingPiece->type == SQUARE){
+        return false;
+    }
+    if(fallingPiece->type == LINE || fallingPiece->type == S || fallingPiece->type == Z || fallingPiece->type == T){
+        rotate90Clockwise(temp);
+    } else{
+        rotate90AntiClockwise(temp);
+    }
+
 
     for(int i = 0; i < P_SIZE; i++){
         for(int j = 0; j < P_SIZE; j++){
@@ -206,8 +249,8 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
         piece * temp = NULL;
         if(checkIfPieceCanRotate(fallingPiece, logicTable, &temp)){
             if(temp != NULL){
-                for(int i = 0; i < 4; i++){
-                    for(int j = 0; j < 4; j++){
+                for(int i = 0; i < P_SIZE; i++){
+                    for(int j = 0; j < P_SIZE; j++){
                         fallingPiece->p[i][j] = (*temp)[i][j];
                     }
                 }
@@ -242,8 +285,8 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
 }
 
 void drawPiece(pieceEntity * fallingPiece, int x, int y, int size, int tableXPosition, int tableYPosition){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(fallingPiece->p[i][j]){
                 DrawRectangle(tableXPosition + (fallingPiece->x + i)*size, tableYPosition + (fallingPiece->y + j)*size, size, size, fallingPiece->c);
                 DrawRectangleLines(tableXPosition + (fallingPiece->x + i)*size, tableYPosition + (fallingPiece->y + j)*size, size, size, (Color){255,255,255,90});
@@ -253,8 +296,8 @@ void drawPiece(pieceEntity * fallingPiece, int x, int y, int size, int tableXPos
 }
 
 void drawPiceAtPos(pieceEntity * piece, int x, int y, int size){
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if(piece->p[i][j]){
                 DrawRectangle(x + i*size, y + j*size, size, size, piece->c);
                 DrawRectangleLines(x + i*size, y + j*size, size, size, (Color){255,255,255,90});
@@ -422,8 +465,8 @@ int main(void)
         pieceShouldDo(&fallingPiece, logicTable, &current_millis, &lastMillis, currentLevel, &pieceFalling);
         
         if(!pieceFalling){ // If the piece is not falling anymore
-            for(int i = 0; i < 4; i++){
-                for(int j = 0; j < 4; j++){
+            for(int i = 0; i < P_SIZE; i++){
+                for(int j = 0; j < P_SIZE; j++){
                     if(fallingPiece.p[i][j]){
                         drawTable[fallingPiece.x + i][fallingPiece.y + j] = fallingPiece.c;
                         piecesPlaced++;
@@ -458,11 +501,11 @@ int main(void)
                     tableXPosition, tableYPosition);
 
         // Endarken all the canvas pieces under the falling piece true values
-        int trueValues[4][2];
+        int trueValues[P_SIZE][2];
         memset(trueValues, -1, sizeof(trueValues));
         
-        for(int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
+        for(int i = 0; i < P_SIZE; i++){
+            for(int j = 0; j < P_SIZE; j++){
                 if(fallingPiece.p[i][j]){
                     trueValues[i][0] = fallingPiece.x + i;
                     trueValues[i][1] = fallingPiece.y + j;
@@ -470,7 +513,7 @@ int main(void)
             }
         }
 
-        for(int i = 0; i < 4; i++){
+        for(int i = 0; i < P_SIZE; i++){
             if(trueValues[i][0] != -1){
                 for(int y = trueValues[i][1]; y < T_HEI; y++){
                     if(logicTable[trueValues[i][0]][y]){
