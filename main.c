@@ -339,10 +339,12 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
 int main(void)
 {   
 
-    const int screenWidth = 1600;
-    const int screenHeight = 1080;
+    const int screenWidth = 260;
+    const int screenHeight = 208;
     const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
     const Color gameOverColor = ColorBrightness(RED, -0.7);
+    const float adjustFactor = (float)screenWidth/1600.0;
+    const int FRAME_THICKNESS_ADJUSTED = FRAME_THICKNESS*adjustFactor;
 
     int TETRIS_BLOCK_SIZE;
     int BLOCK_BORDER_SIZE;
@@ -408,8 +410,8 @@ int main(void)
         if(gameOver){
             BeginDrawing();
             ClearBackground(gameOverColor);
-            DrawText("Game Over", screenWidth*1/7, screenHeight/2-(240*((float)screenWidth/1600.0))/2, 240*((float)screenWidth/1600.0), WHITE);
-            DrawText("Press ENTER...", screenWidth*1/3, screenHeight/2+(240*((float)screenWidth/1600.0) + 40), 70*((float)screenWidth/1600.0), WHITE);
+            DrawText("Game Over", screenWidth*1/7, screenHeight/2-(240*adjustFactor)/2, 240*adjustFactor, WHITE);
+            DrawText("Press ENTER...", screenWidth*1/3, screenHeight/2+(240*adjustFactor + 40), 70*adjustFactor, WHITE);
             if(IsKeyPressed(KEY_ENTER)){
                 gameOver = false;
             }
@@ -525,28 +527,30 @@ int main(void)
             }
         }
 
+        
+
 
         // Draw level as "Score: level"
-        DrawText(TextFormat("Score: %d", ((int)(currentLevel-1)*100) + piecesPlaced*5), 10, screenHeight/2, 90*((float)screenWidth/1600.0), WHITE);
+        DrawText(TextFormat("Score: %d", ((int)(currentLevel-1)*100) + piecesPlaced*5), 10, screenHeight/2, 90*adjustFactor, WHITE);
         
         if(pieceSaved){
-            DrawText("Piece saved", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 + screenHeight/15, 90*((float)screenWidth/1600.0), WHITE);
-            Rectangle savedPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS + TETRIS_BLOCK_SIZE,
-                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3};
-            DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS + TETRIS_BLOCK_SIZE,
-                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
-            DrawRectangleLinesEx(savedPieceFrame, FRAME_THICKNESS, WHITE);
+            DrawText("Piece saved", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 + screenHeight/15, 90*adjustFactor, WHITE);
+            Rectangle savedPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS_ADJUSTED + TETRIS_BLOCK_SIZE,
+                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3};
+            DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS_ADJUSTED + TETRIS_BLOCK_SIZE,
+                                        6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
+            DrawRectangleLinesEx(savedPieceFrame, FRAME_THICKNESS_ADJUSTED, WHITE);
             drawPiceAtPos(&savedPiece, screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID, screenHeight/2 + screenHeight/6 + TETRIS_BLOCK_SIZE*3, TETRIS_BLOCK_SIZE);    
         }
 
         // Draw next piece
-        DrawText("Next piece", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 - screenHeight*2/5, 90*((float)screenWidth/1600.0), WHITE);
-        Rectangle nextPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS - TETRIS_BLOCK_SIZE*2,
-                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3};
+        DrawText("Next piece", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 - screenHeight*2/5, 90*adjustFactor, WHITE);
+        Rectangle nextPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS_ADJUSTED - TETRIS_BLOCK_SIZE*2,
+                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3};
 
-        DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS - TETRIS_BLOCK_SIZE*2,
-                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
-        DrawRectangleLinesEx(nextPieceFrame, FRAME_THICKNESS, WHITE);
+        DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS_ADJUSTED - TETRIS_BLOCK_SIZE*2,
+                                    6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, ColorBrightness(GREEN, -0.4), ColorBrightness(BLUE, -0.4));
+        DrawRectangleLinesEx(nextPieceFrame, FRAME_THICKNESS_ADJUSTED, WHITE);
         drawPiceAtPos(&nextPiece, screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID, screenHeight/2 - screenHeight/5, TETRIS_BLOCK_SIZE);
         
 
@@ -554,9 +558,9 @@ int main(void)
 
 
         // Draw frame around the table
-        Rectangle tableFrame = {tableXPosition - FRAME_THICKNESS, tableYPosition - FRAME_THICKNESS,
-                                T_WID*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*2, T_HEI*TETRIS_BLOCK_SIZE + FRAME_THICKNESS*2};
-        DrawRectangleLinesEx(tableFrame, FRAME_THICKNESS, WHITE);
+        Rectangle tableFrame = {tableXPosition - FRAME_THICKNESS_ADJUSTED, tableYPosition - FRAME_THICKNESS_ADJUSTED,
+                                T_WID*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*2, T_HEI*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*2};
+        DrawRectangleLinesEx(tableFrame, FRAME_THICKNESS_ADJUSTED, WHITE);
 
 
         EndDrawing();
