@@ -220,7 +220,7 @@ bool checkIfPieceCanRotate(pieceEntity * fallingPiece, bool logicTable[T_WID][T_
     return true;
 }
 
-void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], clock_t * currentMillis, clock_t * lastMillis, float currentLevel, bool * pieceFalling){
+void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], long * currentMillis, long * lastMillis, float currentLevel, bool * pieceFalling){
     
     // User input movement
 
@@ -327,7 +327,7 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
                 logicTable[j][0] = false;
                 drawTable[j][0] = TETRIS_BACKGROUND_COLOR;
             }
-            *currentLevel += 0.20;
+            *currentLevel += 0.10;
 
         }
     }
@@ -338,9 +338,9 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
 
 int main(void)
 {   
-
-    const int screenWidth = 260;
-    const int screenHeight = 208;
+    const int FPS = 144;
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
     const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
     const Color gameOverColor = ColorBrightness(RED, -0.7);
     const float adjustFactor = (float)screenWidth/1600.0;
@@ -361,7 +361,7 @@ int main(void)
     int currentGameTime = 0;
     int piecesPlaced = 0;
     int lastPiecesPlaced = -1;
-    clock_t lastMillis = 0;
+    long lastMillis = 0;
 
 
     // Reduce brightness of colors
@@ -372,9 +372,9 @@ int main(void)
     srand(time(NULL));
 
     if(screenWidth / T_WID < screenHeight / T_HEI){
-        TETRIS_BLOCK_SIZE = (screenWidth-100) / T_WID;
+        TETRIS_BLOCK_SIZE = (screenWidth-100*adjustFactor) / T_WID;
     } else {
-        TETRIS_BLOCK_SIZE = (screenHeight-100) / T_HEI;
+        TETRIS_BLOCK_SIZE = (screenHeight-100*adjustFactor) / T_HEI;
     }
     BLOCK_BORDER_SIZE = TETRIS_BLOCK_SIZE / 20;
 
@@ -400,12 +400,14 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "Tetris");
 
-    SetTargetFPS(144);
-
+    SetTargetFPS(FPS);
+    long frames = 0;
     ClearBackground(BLACK);
 
     while (!WindowShouldClose()){
 
+        frames++;
+        long current_millis = 200/FPS * frames;
 
         if(gameOver){
             BeginDrawing();
@@ -419,7 +421,6 @@ int main(void)
             continue;
         }
 
-        clock_t current_millis = clock()/(CLOCKS_PER_SEC/1000);
         
 
         if(!pieceFalling){
@@ -531,10 +532,10 @@ int main(void)
 
 
         // Draw level as "Score: level"
-        DrawText(TextFormat("Score: %d", ((int)(currentLevel-1)*100) + piecesPlaced*5), 10, screenHeight/2, 90*adjustFactor, WHITE);
+        DrawText(TextFormat("Score: %d", ((int)(currentLevel-1)*100) + piecesPlaced*5), 10*adjustFactor, screenHeight/2, 90*adjustFactor, WHITE);
         
         if(pieceSaved){
-            DrawText("Piece saved", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 + screenHeight/15, 90*adjustFactor, WHITE);
+            DrawText("Piece saved", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30*adjustFactor, screenHeight/2 + screenHeight/15, 90*adjustFactor, WHITE);
             Rectangle savedPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS_ADJUSTED + TETRIS_BLOCK_SIZE,
                                         6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3};
             DrawRectangleGradientV(screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 + screenHeight/6 - FRAME_THICKNESS_ADJUSTED + TETRIS_BLOCK_SIZE,
@@ -544,7 +545,7 @@ int main(void)
         }
 
         // Draw next piece
-        DrawText("Next piece", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30, screenHeight/2 - screenHeight*2/5, 90*adjustFactor, WHITE);
+        DrawText("Next piece", screenWidth/2 + TETRIS_BLOCK_SIZE*T_WID/2 + 30*adjustFactor, screenHeight/2 - screenHeight*2/5, 90*adjustFactor, WHITE);
         Rectangle nextPieceFrame = {screenWidth/2 + TETRIS_BLOCK_SIZE*(T_WID-2) - FRAME_THICKNESS_ADJUSTED, screenHeight/2 - screenHeight/5 - FRAME_THICKNESS_ADJUSTED - TETRIS_BLOCK_SIZE*2,
                                     6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3, 6*TETRIS_BLOCK_SIZE + FRAME_THICKNESS_ADJUSTED*3};
 
