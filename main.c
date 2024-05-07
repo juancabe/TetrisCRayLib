@@ -171,22 +171,25 @@ void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], cl
     
     // User input movement
 
-    if(IsKeyPressed(KEY_LEFT)){
+    if(IsKeyDown(KEY_LEFT)){
         if(!checkLeftCollision(fallingPiece, logicTable)){
             fallingPiece->x--;
         }
+        WaitTime(0.1);
         return;
     }
-    if(IsKeyPressed(KEY_RIGHT)){
+    if(IsKeyDown(KEY_RIGHT)){
         if(!checkRightCollision(fallingPiece, logicTable)){
             fallingPiece->x++;
         }
+        WaitTime(0.1);
         return;
     }
-    if(IsKeyPressed(KEY_DOWN)){
+    if(IsKeyDown(KEY_DOWN)){
         if(!checkDownCollision(fallingPiece, logicTable)){
             fallingPiece->y++;
         }
+        WaitTime(0.1);
         return;
     }
     if(IsKeyPressed(KEY_UP)){
@@ -283,8 +286,8 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
 int main(void)
 {   
 
-    const int screenWidth = 1200;
-    const int screenHeight = 700;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
     const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
     const Color gameOverColor = ColorBrightness(RED, -0.7);
 
