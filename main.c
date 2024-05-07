@@ -13,8 +13,19 @@
 #define TETRIS_BACKGROUND_COLOR BLACK
 
 #define FRAME_THICKNESS 10
+#define P_SIZE 4
 
-typedef bool piece[4][4];
+typedef bool piece[P_SIZE][P_SIZE];
+
+typedef enum{
+    SQUARE,
+    LINE,
+    S,
+    Z,
+    L,
+    J,
+    T
+} pieceType;
 
 piece basicPieces[7] = {
     {
@@ -69,6 +80,7 @@ typedef struct{
     int x;
     int y;
     Color c;
+    pieceType type;
 } pieceEntity;
 
 void generateNewPiece(pieceEntity * fallingPiece){
@@ -78,6 +90,7 @@ void generateNewPiece(pieceEntity * fallingPiece){
             fallingPiece->p[i][j] = basicPieces[res][i][j];
         }
     }
+    fallingPiece->type = res;
     res = rand() % PIECE_COLORS_NUM;
     fallingPiece->x = T_WID/2 - 1;
     fallingPiece->y = 0;
@@ -133,28 +146,26 @@ void logicTableAddPiece(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI
     }
 }
 
-piece * rotatePieceEntity(pieceEntity* pe) {
-
-    piece * temp = malloc(sizeof(piece));
-
-    if(temp == NULL){
-        printf("Error allocating memory\n");
-        exit(1);
-    }
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            (*temp)[j][3 - i] = pe->p[i][j];
+void rotate90Clockwise(piece * a)
+{
+    for (int i = 0; i < P_SIZE / 2; i++) {
+        for (int j = i; j < P_SIZE - i - 1; j++) {
+            bool temp = (*a)[i][j];
+            (*a)[i][j] = (*a)[P_SIZE - 1 - j][i];
+            (*a)[P_SIZE - 1 - j][i] = (*a)[P_SIZE - 1 - i][P_SIZE - 1 - j];
+            (*a)[P_SIZE - 1 - i][P_SIZE - 1 - j] = (*a)[j][P_SIZE - 1 - i];
+            (*a)[j][P_SIZE - 1 - i] = temp;
         }
     }
-    
-    return temp;
 }
 
 bool checkIfPieceCanRotate(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], piece ** refToRot){
-    piece * temp = rotatePieceEntity(fallingPiece);
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    piece * temp = malloc(sizeof(piece));
+    memcpy(*temp, fallingPiece->p, sizeof(piece));
+    rotate90Clockwise(temp);
+
+    for(int i = 0; i < P_SIZE; i++){
+        for(int j = 0; j < P_SIZE; j++){
             if((*temp)[i][j]){
                 if(fallingPiece->x + i < 0 || fallingPiece->x + i >= T_WID || fallingPiece->y + j < 0 || fallingPiece->y + j >= T_HEI || logicTable[fallingPiece->x + i][fallingPiece->y + j]){
                     return false;
@@ -165,7 +176,6 @@ bool checkIfPieceCanRotate(pieceEntity * fallingPiece, bool logicTable[T_WID][T_
     *refToRot = temp;
     return true;
 }
-
 
 void pieceShouldDo(pieceEntity * fallingPiece, bool logicTable[T_WID][T_HEI], clock_t * currentMillis, clock_t * lastMillis, float currentLevel, bool * pieceFalling){
     
@@ -286,7 +296,7 @@ void checkCompleteLines(bool logicTable[T_WID][T_HEI], Color drawTable[T_WID][T_
 int main(void)
 {   
 
-    const int screenWidth = 1920;
+    const int screenWidth = 1600;
     const int screenHeight = 1080;
     const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
     const Color gameOverColor = ColorBrightness(RED, -0.7);
