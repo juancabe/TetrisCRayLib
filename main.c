@@ -403,7 +403,7 @@ void pressToStart(bool *randomSeeded, pieceEntity *nextPiece, pieceEntity *saved
     DrawText("Press Screen to start", GetScreenWidth() / 2 - MeasureText("Press ENTER to start", 50) / 2, GetScreenHeight() / 2, 50, WHITE);
     startValue += GetMouseX() * GetMouseY() + GetMouseX() + GetMouseY();
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
+    {   
         *randomSeeded = true;
         SetRandomSeed(startValue);
         generateNewPiece(savedPiece);
@@ -413,16 +413,18 @@ void pressToStart(bool *randomSeeded, pieceEntity *nextPiece, pieceEntity *saved
 
 int main(void)
 {
-    const int FPS = 144;
-    const int screenWidth = 1600;
-    const int screenHeight = 900;
+    const int FPS = 60;
     const Color loopBackgroundColor = ColorBrightness(GRAY, -0.7);
     const Color gameOverColor = ColorBrightness(RED, -0.7);
-    const float adjustFactor = (float)screenWidth / 1600.0;
-    const int FRAME_THICKNESS_ADJUSTED = FRAME_THICKNESS * adjustFactor;
+    
 
     int TETRIS_BLOCK_SIZE;
     int BLOCK_BORDER_SIZE;
+
+    int screenWidth = 1200;
+    int screenHeight = 600;
+    float adjustFactor = (float)screenWidth / 1600.0;
+    int FRAME_THICKNESS_ADJUSTED = FRAME_THICKNESS * adjustFactor;
 
     bool gameOver = false;
     bool pieceFalling = false;
