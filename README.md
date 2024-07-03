@@ -85,4 +85,3 @@ This project is open-source and available under the MIT License.
 ## Acknowledgments
 
 - Raylib library for providing a simple and easy-to-use platform for game development.
-```
